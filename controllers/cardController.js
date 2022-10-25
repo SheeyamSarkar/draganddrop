@@ -12,20 +12,17 @@ const getAllCards = asyncHandler(async (req,res) => {
 //Create card
 const setCard = asyncHandler(async (req,res) => {
 
-    const {categoryOrSubcategory, name, precedence} = req.body
+    const {name} = req.body
     
     if(!name){
         res.status(400)
         throw new Error('Please Add Name')
     }
-    if(!precedence){
-        res.status(400)
-        throw new Error('Please Add Precedence')
-    }
+    const cardsCount = await Card.count()
 
     const card = await Card.create({
         name,
-        precedence,
+        precedence : cardsCount+1,
     })
     res.status(200).json(card)
 })
@@ -66,6 +63,8 @@ const deleteCard = asyncHandler(async (req,res) => {
     }
 
     await card.remove()
+    
+    res.status(200).json({ id: req.params.id})
 })
 
 export {
