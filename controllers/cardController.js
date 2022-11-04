@@ -4,7 +4,7 @@ import Card from '../models/cardModels.js';
 
 //All card
 const getAllCards = asyncHandler(async (req,res) => {
-    const cards = await Card.find()
+    const cards = await Card.find().sort('precedence')
 
     res.status(200).json(cards)
 })
@@ -52,6 +52,32 @@ const updateCard = asyncHandler(async (req,res) => {
     res.status(200).json(updatedcard)
 })
 
+//Delete card
+const reorderCards = asyncHandler(async (req,res) => {
+    const {source, destination} = req.params
+
+    const draggedCard = await Card.findOne({precedence: source})
+
+    await draggedCard.updateOne({precedence: destination})
+
+    if (destination > source) {
+
+        await Card.updateMany(
+            {precedence: {$gt: source, $lte: destination}}, 
+            {$inc: {precedence: -1}}
+        )
+    }
+
+    if (destination < source) {
+
+        await Card.updateMany(
+            {precedence: {$lt: source, $gte: destination}}, 
+            {$inc: {precedence: 1}}
+        )
+    }
+
+    res.status(200).json('sorted successfully')
+})
 
 //Delete card
 const deleteCard = asyncHandler(async (req,res) => {
@@ -62,9 +88,6 @@ const deleteCard = asyncHandler(async (req,res) => {
         throw new Error('card Not Found')
     }
 
-    // const cardsWithLowerPrecedence = await Card.find({precedence: {$gt : card.precedence}})
-
-    // await cardsWithLowerPrecedence.updateM
     await Card.updateMany({precedence: {$gt : card.precedence}}, {$inc: {precedence: -1}})
 
     await card.remove()
@@ -76,6 +99,7 @@ export {
     getAllCards,
     setCard,
     updateCard,
+    reorderCards,
     deleteCard
 }
 
