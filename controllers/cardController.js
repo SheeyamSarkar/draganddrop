@@ -62,6 +62,11 @@ const deleteCard = asyncHandler(async (req,res) => {
         throw new Error('card Not Found')
     }
 
+    // const cardsWithLowerPrecedence = await Card.find({precedence: {$gt : card.precedence}})
+
+    // await cardsWithLowerPrecedence.updateM
+    await Card.updateMany({precedence: {$gt : card.precedence}}, {$inc: {precedence: -1}})
+
     await card.remove()
     
     res.status(200).json({ id: req.params.id})
