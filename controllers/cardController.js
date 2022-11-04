@@ -58,7 +58,6 @@ const reorderCards = asyncHandler(async (req,res) => {
 
     const draggedCard = await Card.findOne({precedence: source})
 
-    await draggedCard.updateOne({precedence: destination})
 
     if (destination > source) {
 
@@ -75,6 +74,8 @@ const reorderCards = asyncHandler(async (req,res) => {
             {$inc: {precedence: 1}}
         )
     }
+
+    await draggedCard.updateOne({precedence: destination})
 
     res.status(200).json('sorted successfully')
 })
